@@ -1,0 +1,38 @@
+{% extends "main/base.html" %}
+{% load static %}
+<html lang="en">
+    <head>
+        {% block additional_content %}
+        
+        <!-- {% block title %}All data{% endblock %} -->
+
+        <style>
+            table,
+            th,
+            tr,
+            td {
+                padding: 5px;
+                border: solid;
+            }
+            #chart {
+                width: 600px;
+            }
+            #chart-container {
+            position: relative;
+            height: 60vh;
+            width: 55%;
+            overflow: hidden;
+            }
+        </style>
+    {% endblock %}
+
+    </head>
+    <body>
+        {% block content %} 
+        <h2 class="text-gray-900 dark:text-white text-center">
+        Use Filter to get started
+        </h2>
+        <script src="https://fastly.jsdelivr.net/npm/echarts@5.4.2/dist/echarts.min.js"></script>
+        {% endblock %}
+    </body>
+</html>

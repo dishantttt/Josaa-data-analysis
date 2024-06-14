@@ -1,0 +1,239 @@
+{% extends "main/base.html" %}
+
+
+<head>
+    {% block title %}dev_q3{% endblock %}
+    {% block additional_content %}
+    <script src="https://cdn.jsdelivr.net/npm/echarts@5.2.2/dist/echarts.min.js"></script>
+    <style>
+        table,
+        th,
+        tr,
+        td {
+            padding: 5px;
+            border: solid;
+            text-align: center;
+        }
+
+        #chart-container {
+            position: relative;
+            height: 90vh;
+            width: 80%;
+            overflow: hidden;
+        }
+    </style>
+    {% endblock %}
+
+</head>
+
+<body>
+    {% block content %}
+
+    <h2> How has the cutoff rank for different categories (General, OBC, SC, ST, etc.) evolved over the years? </h2>
+    <div id="chart-container"></div>
+
+    <!-- <table id="data_table">
+        <tr>
+            <th>SI No</th>
+            <th>Institute Name</th>
+            <th>Institute Type</th>
+            <th>Program</th>
+            <th>Seat Type</th>
+            <th>Gender</th>
+            <th>Opening Rank</th>
+            <th>Closing Rank</th>
+            <th>Year</th>
+            <th>Round No</th>
+        </tr>
+        {% for data in alldata %}
+        <tr>
+            <td>{{forloop.counter}}</td>
+            <td>{{data.institute}}</td>
+            <td>{{data.institute_type}}</td>
+            <td>{{data.program}}</td>
+            <td>{{data.seat_type}}</td>
+            <td>{{data.gender}}</td>
+            <td>{{data.opening_rank}}</td>
+            <td>{{data.closing_rank}}</td>
+            <td>{{data.year}}</td>
+            <td>{{data.roundNo}}</td>
+        </tr>
+        {% endfor %}
+    </table> -->
+
+
+
+    <script src="https://fastly.jsdelivr.net/npm/echarts@5.4.2/dist/echarts.min.js" async></script>
+
+    <script>
+
+        var dataString = '{{ jsdata|safe }}';
+        var data = JSON.parse(dataString);
+        // console.log(data);
+
+        years = [];
+        closing_rank = [];
+        seat_type = []
+
+        function removeDuplicates(arr) {
+            return [...new Set(arr)];
+        }
+
+        for (var i = 0; i < data.length; i++) {
+            years.push(data[i].year);
+            seat_type.push(data[i].seat_type);
+            // branches.push(data[i].program);
+        }
+        seat_type = removeDuplicates(seat_type);
+        years = removeDuplicates(years);
+        // branches = removeDuplicates(branches);
+
+        // console.log(colleges);
+        for (var k = 0; k < seat_type.length; k++) {
+            temp1 = [];
+            temp2 = [];
+            for (var i = 0; i < years.length; i++) {
+                var sum2 = 0;
+                for (var j = 0; j < data.length; j++) {
+                    if (data[j].seat_type == seat_type[k]) {
+                        if (data[j].year == years[i]) {
+                            sum2 += parseInt(data[j].closing_rank, 10); //don't forget to add the base
+                        }
+                    }
+                }
+                var avg2 = sum2;
+                avg2 = Math.round(avg2);
+                temp2.push(avg2);
+            }
+            closing_rank.push(temp2);
+        }
+        console.log(closing_rank);
+        console.log(seat_type)
+        var dom = document.getElementById("chart-container");
+        var myChart = echarts.init(dom, null, {
+            renderer: "canvas",
+            useDirtyRect: false,
+        });
+
+
+        var series1 = [];
+        colors = ['#ae1029', '#0065c2', '#26c238', '#9876aa', '#fb8649',
+            '#57904b', '#d35b5c'];
+        for (var i = 0; i < closing_rank.length; i++) {
+            series1.push({
+                name: seat_type[i],
+                type: "line",
+                data: closing_rank[i],
+                smooth: true,
+                symbolSize: 3,
+                // color:colors[i],
+                // yAxisIndex: 0,
+            }
+            );
+        }
+        var series2 = [];
+        // colors = ['#ae1029','#0065c2','#26c238', '#9876aa', '#fb8649', 
+        //     '#57904b','#d35b5c'];
+        // for (var i = 0; i < closing_ranks.length;i++) {
+        //     series2.push(
+        //     {
+        //         name:colleges[i],
+        //         type: "line",
+        //         data: closing_ranks[i],
+        //         smooth: true, 
+        //         symbolSize: 3,
+        //         // yAxisIndex: 1,
+        //     },
+        //     );
+        // }
+
+        // console.log(series);
+        var isClosing = 0;
+        var text = '';
+        if (isClosing) {
+            text = 'Trend of Closing ranks over different years.'
+        }
+        else {
+            text = 'Trend of Opening ranks over different years.'
+        }
+        option = {
+            textStyle: {
+                color: '#fff',
+                fontWeight: '600'
+            },
+            title: {
+                text: text,
+                bottom: 0,
+                left: 350,
+                // bottom:'middle',
+                textStyle: {
+                    fontSize: 20,
+                },
+            },
+            tooltip: {
+                trigger: "axis",
+            },
+            legend: {
+                zLevel: 1,
+                orient: 'vertical',
+                type: 'scroll',
+                top: 'center',
+                right: 0,
+                textStyle: {
+                    color: '#fff',
+                    fontWeight: '600'
+                },
+                // itemHeight:2,
+            },
+            series: series1,
+            grid: {
+                left: "5%",
+                right: "7%",
+                bottom: "8%",
+                containLabel: true,
+            },
+            toolbox: {
+            },
+            xAxis: {
+                type: "category",
+                boundaryGap: true,
+                data: years,
+                name: 'Years',
+            },
+            yAxis: [
+                {
+                    type: "value",
+                    boundaryGap: true,
+                    scale: true,
+                    name: isClosing ? 'Closing Ranks' : 'Opening Ranks',
+                },
+            ]
+        }
+        if (option && typeof option === "object") {
+            myChart.setOption(option);
+        }
+
+        function changeData() {
+            var isChecked = document.getElementById('flexSwitchCheckDefault').checked;
+            console.log(isChecked);
+            // var table = document.getElementById('data_table');
+            if (isChecked) {
+                if (option && typeof option === "object") {
+                    option.series = series2;
+                    myChart.setOption(option);
+                }
+                // table.style.display = 'block';
+            }
+            else {
+                if (option && typeof option === "object") {
+                    option.series = series1;
+                    myChart.setOption(option);
+                }
+                // table.style.display = 'none';
+            }
+        }
+        window.addEventListener("resize", myChart.resize);
+    </script>
+    {% endblock %}
+
+</body>

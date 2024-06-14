@@ -1,0 +1,129 @@
+{% extends "main/base.html" %}
+<head>
+  {% block title %}OLD vs NEW{% endblock %} {% block additional_content %}
+  <script src="https://cdn.jsdelivr.net/npm/echarts@5.2.2/dist/echarts.min.js"></script>
+
+  <style>
+    .custom-button {
+      background-color: #4caf50;
+      color: white;
+      padding: 8px 10px;
+      border: none;
+      cursor: pointer;
+      margin: 5px;
+      font-size: min(3vw, 2vh);
+      display: flex;
+    }
+
+    .custom-button:hover {
+      background-color: #45a049;
+    }
+
+    .button-container {
+      text-align: center;
+      width: 70vw;
+      display: flex;
+      justify-content: center;
+      flex-wrap: wrap;
+    }
+    #graph-container {
+      position: relative;
+      height: 90vh;
+      width: 80%;
+      overflow: hidden;
+    }
+  </style>
+  {% endblock %}
+</head>
+<body>
+  {% block content %}
+  <h2>Popularity Variation between New and Old IITs?</h2>
+  <div id="graph-container"></div>
+  <div class="button-container">
+    <button
+      id="redirectButton"
+      class="custom-button"
+      onclick="redirectToMohitQ1()"
+    >
+      Check variations among New IITS
+    </button>
+    <button
+      id="redirectButton"
+      class="custom-button"
+      onclick="redirectToMohitQ2()"
+    >
+      Check variations among Old IITS
+    </button>
+  </div>
+  <script>
+    function redirectToMohitQ1() {
+      var url = "{% url 'Moh_q1exp' %}";
+      window.location.href = url;
+    }
+    function redirectToMohitQ2() {
+      var url = "{% url 'Moh_q1exp2' %}";
+      window.location.href = url;
+    }
+    // Create an ECharts instance
+    var myChart = echarts.init(document.getElementById("graph-container"));
+
+    var newIITData = JSON.parse("{{ new_iit_data|escapejs }}");
+    var oldIITData = JSON.parse("{{ old_iit_data|escapejs }}");
+
+    var years = newIITData.map(function (item) {
+      return item.year;
+    });
+
+    var newIITPopularity = newIITData.map(function (item) {
+      return 1000 / item.avg_closing_rank;
+    });
+
+    var oldIITPopularity = oldIITData.map(function (item) {
+      return 1000 / item.avg_closing_rank;
+    });
+
+    var option = {
+      legend: {
+        data: ["New IIT", "Old IIT"],
+        zLevel: 1,
+        orient: "vertical",
+        type: "scroll",
+        top: 25,
+        textStyle: {
+          color: "white",
+        },
+      },
+      grid: {
+        top: "20%",
+        left: "5%",
+        right: "7%",
+        bottom: "8%",
+        containLabel: true,
+      },
+      xAxis: {
+        type: "category",
+        data: years,
+        name: "Years",
+      },
+      yAxis: {
+        type: "value",
+        name: "Popularity",
+      },
+      series: [
+        {
+          name: "New IIT",
+          data: newIITPopularity,
+          type: "line",
+        },
+        {
+          name: "Old IIT",
+          data: oldIITPopularity,
+          type: "line",
+        },
+      ],
+    };
+
+    myChart.setOption(option);
+  </script>
+  {% endblock %}
+</body>

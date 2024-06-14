@@ -1,0 +1,337 @@
+{% extends "main/base.html" %}
+
+
+<head>
+    {% block title %}digvijay q1{% endblock %}
+    {% block additional_content %}
+    <script src="https://cdn.jsdelivr.net/npm/echarts@5.2.2/dist/echarts.min.js"></script>
+    <!-- Include DataTables CSS -->
+
+
+    <style>
+        div.dataTables_wrapper div.dataTables_filter{
+            color: gray;
+
+        }
+        div.dataTables_wrapper{
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding-top: 2%;
+            padding-bottom: 2%;
+            width: 90%;
+            padding-left: 10%;
+        }
+        div.dataTables_wrapper div.dataTables_paginate span .ellipsis{
+            color: #777 !important;
+        }
+        div.dataTables_wrapper div.dataTables_paginate span .paginate_button,.dataTables_wrapper .dataTables_paginate .paginate_button{
+            
+            color: gray !important;
+        }
+        
+        .dataTables_wrapper .dataTables_paginate .paginate_button.disabled, .dataTables_wrapper .dataTables_paginate{
+            color: gray !important;
+        }
+         .dataTables_wrapper .dataTables_paginate .paginate_button.disabled:hover{
+            color: black !important;
+        }
+
+        .dataTables_wrapper .dataTables_paginate .paginate_button:hover {
+            border: 1px solid gray !important;
+            background: gray !important;
+            color: black !important;
+        }
+        .dataTables_wrapper .dataTables_length{
+            display: none;
+        }
+        div.dataTables_wrapper div.dataTables_filter{
+            padding-bottom: 2%;
+        }
+        
+        div.dataTables_wrapper div.dataTables_filter input {
+            background-color: #222;
+            color: white;
+            border: 1px solid #FFF;
+            padding-bottom: 2%;
+            /* Add any other CSS styles as needed */
+        }
+
+        /* Customize pagination buttons */
+         .dark-table {
+                    background-color: #333;
+                    color: white;
+                    width: 70%;
+                    position: relative;
+                    text-align: center;
+                    justify-content: center;
+                }
+
+                .dark-table th,
+                .dark-table td {
+                    padding: 10px;
+                    border: 1px solid #555;
+                }
+
+                .dark-table th {
+                    background-color: #222;
+                }
+
+                .dark-table td{
+                    background-color: #222;
+                }
+
+                .dark-table tr:hover {
+                    background-color: #444;
+                }
+        #chart-container {
+            position: relative;
+            height: 90vh;
+            width: 80%;
+            overflow: hidden;
+            }
+        @keyframes rotate {
+            from {
+                transform: rotate(0deg);
+            }
+            to { 
+                transform: rotate(360deg);
+            }
+        }
+
+        @-webkit-keyframes rotate {
+            from {
+                -webkit-transform: rotate(0deg);
+            }
+            to { 
+                -webkit-transform: rotate(360deg);
+            }
+        }
+
+        .load {
+            position: absolute;
+            width: 100px;
+            height: 100px;
+            margin-left: calc(50vw - 50px);
+            margin-top: calc(50vh - 50px);
+            border:solid 10px blue;
+            border-radius: 50%;
+            border-right-color: transparent;
+            border-bottom-color: transparent;
+            -webkit-transition: all 0.5s ease-in;
+            -webkit-animation-name:             rotate; 
+            -webkit-animation-duration:         1.0s; 
+            -webkit-animation-iteration-count:  infinite;
+            -webkit-animation-timing-function: linear;
+                
+                transition: all 0.5s ease-in;
+            animation-name:             rotate; 
+            animation-duration:         1.0s; 
+            animation-iteration-count:  infinite;
+            animation-timing-function: linear; 
+        }
+        #fade{
+            filter: blur(5px);
+        }
+    </style>
+    {% endblock %}
+    <style>
+      
+    </style>
+
+</head>
+<body>
+    {% block content %}
+
+        <h2> What is the trend in the opening and closing ranks for popular branches?</h2>
+    <div class="form-check form-switch">
+    <input class="form-check-input" type="checkbox" role="switch" onchange=changeData() id="flexSwitchCheckDefault">
+    <label class="form-check-label" for="flexSwitchCheckDefault">Closing Rank </label>
+    <div id="chart-container"></div>
+      
+
+</div>
+    <script src="https://fastly.jsdelivr.net/npm/echarts@5.4.2/dist/echarts.min.js" async></script>
+      
+    <script>
+        var dataString = '{{ jsdata|safe }}';
+        var data = JSON.parse(dataString);
+        years = [];
+        colleges = [];
+        opening_ranks = [];
+        closing_ranks =[];
+        branches =[];
+
+        function removeDuplicates(arr) {
+            return [...new Set(arr)];
+        }
+
+        for(var i = 0;i<data.length;i++){
+            years.push(data[i].year);
+            colleges.push(data[i].institute);
+            branches.push(data[i].program);
+        }
+        colleges = removeDuplicates(colleges);
+        years = removeDuplicates(years);
+        branches = removeDuplicates(branches);
+
+        // console.log(colleges);
+        for(var k = 0 ;k<branches.length ;k++) {
+            temp1 = [];
+            temp2 = [];
+            for(var i = 0; i < years.length; i++){
+                var sum1 = 0;
+                var sum2 = 0;
+                for(var j = 0;j<data.length;j++){
+                    if(data[j].program == branches[k]){
+                        if(data[j].year == years[i]){
+                            sum1 += parseInt( data[j].opening_rank, 10); //don't forget to add the base
+                            sum2 += parseInt( data[j].closing_rank, 10); //don't forget to add the base
+                        }
+                    }
+                }
+                var avg1 = sum1/colleges.length;
+                avg1 = Math.round(avg1);
+                var avg2 = sum2/colleges.length;
+                avg2 = Math.round(avg2);
+                temp1.push(avg1);
+                temp2.push(avg2);
+            }
+            opening_ranks.push(temp1);
+            closing_ranks.push(temp2);
+        }
+        console.log(opening_ranks);
+
+        
+
+        var series1 = [];
+        colors = ['#ae1029','#0065c2','#26c238', '#9876aa', '#fb8649', 
+            '#57904b','#d35b5c'];
+        for (var i = 0; i < opening_ranks.length;i++) {
+            series1.push({
+                name:branches[i],
+                type: "line",
+                data: opening_ranks[i],
+                smooth: true, 
+                symbolSize: 3,
+                // color:colors[i],
+                // yAxisIndex: 0,
+            }
+            );
+        }
+        var series2 = [];
+        colors = ['#ae1029','#0065c2','#26c238', '#9876aa', '#fb8649', 
+            '#57904b','#d35b5c'];
+        for (var i = 0; i < closing_ranks.length;i++) {
+            series2.push(
+            {
+                name:branches[i],
+                type: "line",
+                data: closing_ranks[i],
+                smooth: true, 
+                symbolSize: 3,
+                // yAxisIndex: 1,
+            },
+            );
+        }
+        var dom = document.getElementById("chart-container");
+        var myChart = echarts.init(dom, null, {
+            renderer: "canvas",
+            useDirtyRect: false,
+
+        })
+        // console.log(series);
+        var isClosing = 0;
+        var text = '';
+        if(isClosing){
+            text = 'Trend of Closing ranks over different years.'
+        }
+        else{
+            text = 'Trend of Opening ranks over different years.'
+        }
+        option = {
+                title: {
+                    text: text,
+                    bottom:0,
+                    left:350,
+                    // bottom:'middle',
+                    textStyle: {
+                        fontSize: 20,
+                    },
+                }, 
+                darkMode: true,
+                tooltip: {
+                    trigger: "axis",
+                },
+                legend: {
+                    show:true,
+                    type:'scroll',
+                    orient: "horizontal",
+                    height: 100,
+                    top: 0,
+                    data:branches,
+                    textStyle:{
+                        color:'white',
+                    }
+                }, 
+                series: series1,
+                grid: {
+                    left: "5%",
+                    right: "7%",
+                    bottom: "8%",
+                    containLabel: true,
+                },
+                toolbox: {
+                },
+                xAxis: {
+                    type: "category",
+                    boundaryGap: true,
+                    data: years,
+                    name:'Years',
+                },
+                yAxis: [
+                    {
+                        type: "value",
+                        boundaryGap:true,
+                        scale:true,
+                        name: isClosing ? 'Closing Ranks' : 'Opening Ranks',
+                    },
+                ]
+            }
+            if (option && typeof option === "object") {
+                        myChart.setOption(option);
+                }
+
+            function changeData(){
+                var isChecked = document.getElementById('flexSwitchCheckDefault').checked;
+                console.log(isChecked);
+                // var table = document.getElementById('data_table');
+                if(isChecked) {
+                    if (option && typeof option === "object") {
+                        option.series = series2;
+                        myChart.setOption(option);
+                    }
+                    // table.style.display = 'block';
+                }
+                else{
+                    if (option && typeof option === "object") {
+                        option.series = series1;
+                        myChart.setOption(option);
+                    }
+                    // table.style.display = 'none';
+                }
+            }
+            window.addEventListener("resize", myChart.resize);
+        
+        var dataString = '{{ jsdata|safe }}';
+        var data = JSON.parse(dataString);
+    
+        // console.log(data);
+
+
+    </script>
+    {% endblock %}
+
+</body>
+</html>

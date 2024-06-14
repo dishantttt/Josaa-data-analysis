@@ -1,0 +1,234 @@
+{% extends "main/base.html" %}
+
+
+<head>
+    {% block title %}Branch Popularity{% endblock %}
+    {% block additional_content %}
+  <script src="https://cdn.jsdelivr.net/npm/echarts@5.2.2/dist/echarts.min.js" async></script>
+<style>
+  .pagination {
+    display: flex;
+    justify-content: center;
+    margin-top: 10px;
+    font-family: Arial, sans-serif;
+    font-size: large;
+    width: 70vw;
+  }
+
+  .pagination li {
+    list-style-type: none;
+    margin-right: 8px;
+  }
+
+  .pagination a {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    text-decoration: none;
+    padding: 4px 4px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    color: #333;
+    background-color: #fff;
+    transition: background-color 0.3s;
+  }
+
+  .pagination a:hover {
+    background-color: #f5f5f5;
+  }
+
+  .pagination .active a {
+    background-color: #555;
+    color: #fff;
+  }
+
+  .pagination .spacer {
+    margin: 0 3px;
+    height: fit-content;
+    font-size: larger;
+  }
+
+  .pagination .arrow-icon {
+    margin-right: 3px;
+  }
+
+  .pagination .current-page,
+  .pagination .total-pages {
+    font-family: 'Courier New', Courier, monospace;
+    display: flex;
+    font-size: larger;
+    color: grey;
+    text-align: center;
+    align-items: center;
+  }
+
+  #chart-container {
+    position: relative;
+    height: 90vh;
+    width: 80%;
+    overflow: hidden;
+  }
+
+  @keyframes rotate {
+    from {
+      transform: rotate(0deg);
+    }
+
+    to {
+      transform: rotate(360deg);
+    }
+  }
+
+  @-webkit-keyframes rotate {
+    from {
+      -webkit-transform: rotate(0deg);
+    }
+
+    to {
+      -webkit-transform: rotate(360deg);
+    }
+  }
+
+  .load {
+    position: absolute;
+    width: 100px;
+    height: 100px;
+    margin-left: calc(50vw - 50px);
+    margin-top: calc(50vh - 50px);
+    border: solid 10px blue;
+    border-radius: 50%;
+    border-right-color: transparent;
+    border-bottom-color: transparent;
+    -webkit-transition: all 0.5s ease-in;
+    -webkit-animation-name: rotate;
+    -webkit-animation-duration: 1.0s;
+    -webkit-animation-iteration-count: infinite;
+    -webkit-animation-timing-function: linear;
+
+    transition: all 0.5s ease-in;
+    animation-name: rotate;
+    animation-duration: 1.0s;
+    animation-iteration-count: infinite;
+    animation-timing-function: linear;
+  }
+
+  #fade {
+    filter: blur(5px);
+  }
+  
+</style>
+{% endblock %}
+</head>
+
+
+<body>
+  {% block content %}
+  <div>
+    <h2>Popularity Variation among different branches
+    </h2>
+    <div id="graph-container" style="width: 80vw; height: 70vh; padding-top: 30px;"></div>
+  </div>
+    <div class="pagination">
+      {% if branches.has_previous %}
+      <a href="?page={{ branches.previous_page_number }}">
+        <span class="arrow-icon">&larr;</span>
+      </a>
+      {% endif %}
+      <span class="spacer">|</span>
+      <span class="current-page">{{ branches.number }}/</span>
+      <span class="total-pages">{{ branches.paginator.num_pages }}</span>
+      <span class="spacer">|</span>
+      {% if branches.has_next %}
+      <a href="?page={{ branches.next_page_number }}">
+        <span class="arrow-icon">&rarr;</span>
+      </a>
+      {% endif %}
+    </div>
+  <script>
+    // Create an ECharts instance
+    window.addEventListener('load', function () {
+      var myChart = echarts.init(document.getElementById('graph-container'));
+
+      var seriesData = branchData.map(function (branch) {
+        var popularityData = branch.data.map(function (item) {
+          var popularity = 10000 / item.avg_closing_rank;
+          var scaledPopularity = (popularity)
+          return scaledPopularity;
+        });
+
+        return {
+          name: branch.name,
+          type: 'line',
+          data: popularityData
+        };
+      });
+
+
+      var option = {
+
+        tooltip: {
+          trigger: "axis",
+          position: function (point, params, dom, rect, size) {
+            var vw = Math.max(document.documentElement.clientWidth || 0, window.innerWidth || 0);
+            var tooltipWidth = size.contentSize[0];
+
+            // Calculate the maximum x-coordinate for the tooltip position
+            var maxX = vw - tooltipWidth - 10;
+
+            // Check if the cursor is beyond 50% of vw
+            if (point[0] > vw / 2 && point[0] > maxX) {
+              // Display tooltip on the left side of the cursor within the screen
+              return [maxX, point[1]];
+            } else if (point[0] > vw / 2) {
+              // Display tooltip on the left side of the cursor
+              return [point[0] - tooltipWidth - 10, point[1]];
+            } else if (point[0] < maxX) {
+              // Display tooltip on the right side of the cursor within the screen
+              return [point[0] + 10, point[1]];
+            } else {
+              // Display tooltip on the right side of the cursor
+              return [maxX, point[1]];
+            }
+          }
+        },
+        legend: {
+          orient: 'vertical',
+          type:'scroll',
+          height:'115',
+          textStyle:{
+                    color:'white',
+        }
+        },
+        grid: {
+          top:'200',
+          right: "25%",
+            bottom: "8%",
+          containLabel: true,
+        },
+        
+        xAxis: {
+          type: 'category',
+          data: years,
+          name: 'Years'
+        },
+        yAxis: {
+          type: 'value',
+          name: 'Popularity',
+        },
+        series: seriesData
+      };
+      myChart.setOption(option);
+
+    })
+
+    var branchData = JSON.parse('{{ branch_data|escapejs }}');
+    var years = JSON.parse('{{ years|escapejs }}');
+    console.log(branchData)
+    console.log(years)
+
+  </script>
+    {% endblock %}
+
+</body>
+
+</html>

@@ -1,0 +1,227 @@
+{% extends "main/base.html" %}
+
+
+<head>
+    {% block title %}siddhant q1{% endblock %}
+    {% block additional_content %}
+    <script src="https://cdn.jsdelivr.net/npm/echarts@5.2.2/dist/echarts.min.js"></script>
+    <style>
+        body{
+            background-color:rgb(31, 41, 55);
+        }
+        table,
+        th,
+        tr,
+        td {
+            padding: 5px;
+            border: solid;
+            text-align: center;
+        }
+        #chart-container {
+            position: relative;
+            height: 90vh;
+            width: 100%;
+            overflow: hidden;
+            }
+    </style>
+    {% endblock %}
+</head>
+   
+
+<body>
+    {% block content %}
+    <h2> What is the average rank of students admitted to the IITs in different branches?</h2>
+    <div id="chart-container"></div>
+
+   
+
+    <script src="https://fastly.jsdelivr.net/npm/echarts@5.4.2/dist/echarts.min.js"></script>
+
+    <script>
+          var dataString = '{{ jsdata|safe }}';
+          var data = JSON.parse(dataString);
+        // console.log(data);
+        colleges=[];
+        years = [];
+        opening_ranks = [];
+        closing_ranks = [];
+        branches = [];
+        other_branches=[];
+        rank_average = [];
+    
+        function removeDuplicates(arr) {
+            return [...new Set(arr)];
+        }
+    
+        for (var i = 0; i < data.length; i++) {
+            years.push(data[i].year);
+            other_branches.push(data[i].program);
+            colleges.push(data[i].institute);
+        }
+        console.log(colleges);
+
+        for(var i=0;i<20;i++){
+            branches.push(data[i].program);
+        }
+        colleges = removeDuplicates(colleges);
+        years = removeDuplicates(years);
+        branches = removeDuplicates(branches);
+        other_branches=removeDuplicates(other_branches);
+        other_branches = other_branches.filter(item => !branches.includes(item));
+        var rank_avgSum=0;
+        // console.log(colleges);
+        for (var k = 0; k < branches.length; k++) {
+            var avg1=0;
+            var avg2=0;
+            var collegenum=[];
+            for (var i = 0; i < years.length; i++) {
+                var sum1 = 0;
+                var sum2 = 0;
+                for (var j = 0; j < data.length; j++) {
+                    if (data[j].program == branches[k]) {
+                        if (data[j].year == years[i]) {
+                            collegenum.push(data[j].institute);
+                            sum1 += parseInt(data[j].opening_rank, 10); //don't forget to add the base
+                            sum2 += parseInt(data[j].closing_rank, 10); //don't forget to add the base
+                        }
+                    }
+                }
+                avg1 += sum1 / collegenum.length;
+                avg1 = Math.round(avg1);
+                avg2 += sum2 / collegenum.length;
+                avg2 = Math.round(avg2);
+                console.log(avg1);
+            }
+    
+            var rank_avg = ((avg2 + avg1)/2)/years.length;
+            rank_average.push(Math.round(rank_avg));
+        }
+        for (var k = 0; k < other_branches.length; k++) {
+            var avg1=0;
+            var avg2=0;
+            var collegenum=[];
+            for (var i = 0; i < years.length; i++) {
+                var sum1 = 0;
+                var sum2 = 0;
+                for (var j = 0; j < data.length; j++) {
+                    if (data[j].program == other_branches[k]) {
+                        if (data[j].year == years[i]) {
+                            collegenum.push(data[j].institute);
+                            sum1 += parseInt(data[j].opening_rank, 10); //don't forget to add the base
+                            sum2 += parseInt(data[j].closing_rank, 10); //don't forget to add the base
+                        }
+                    }
+                }
+                avg1 = sum1 / collegenum.length;
+                avg1 = Math.round(avg1);
+                 avg2 = sum2 / collegenum.length;
+                avg2 = Math.round(avg2);
+            }
+             rank_avgSum+=((avg2+avg1)/2)/years.length;
+            
+        }
+        var labels=[];
+        rank_average.push(Math.round(rank_avgSum/other_branches.length));
+        branches.push("Other Branches",other_branches);
+        labels.push[0];
+        labels=['CL(B.Tech)','CH(BS)','CE(B.Tech)','CSE(B.Tech)','EE(B.Tech)','ECE(M.Tech)','EE(M.Tech)','ERE(M.Tech)','EP(B.Tech)','EP(M.Tech)','ME(B.Tech)','ME(M.Tech)','MSE(B.Tech)','MSE&CR(M.Tech)','MSE&MP(M.Tech)','Others']
+
+        var dom = document.getElementById("chart-container");
+        var myChart = echarts.init(dom, null, {
+            renderer: "canvas",
+            useDirtyRect: false,
+        });
+    
+        var series1 = [];
+        colors = [
+            "#ae1029",
+            "#0065c2",
+            "#26c238",
+            "#9876aa",
+            "#fb8649",
+            "#57904b",
+            "#d35b5c",
+        ];
+        series1.push({
+            name: "Average Ranks",
+            type: "line",
+            data: rank_average,
+            smooth: true,
+            symbolSize: 3,
+        });
+    
+        // console.log(series);
+        var text = "Trend of Rank Average between Opening and Closing Ranks over Different Branches.";
+        option = {
+            title: {
+                text: text,
+                bottom: 0,
+                left: 350,
+                textStyle: {
+                    fontSize: 20,
+                    color:'white',
+                },
+            },
+            tooltip: {
+                trigger: "axis",
+            },
+            legend: {
+                zLevel: 1,
+                orient: "vertical",
+                type: "scroll",
+                top: 25,   textStyle:{
+                color:'white',
+            }
+            
+            },
+            series: series1,
+            grid: {
+                left: "5%",
+                right: "7%",
+                bottom: "8%",
+                containLabel: true,
+            },
+            toolbox: {},
+            xAxis: {
+                type: "category",
+                boundaryGap: true,
+                data:labels,
+                name: "Branches",
+                axisLabel: {
+        fontSize:10,
+        rotate:30,
+        color:'white',
+    },
+},
+            yAxis: [
+                {
+                    type: "value",
+                    boundaryGap: true,
+                    scale: true,
+                    name: " Ranks",
+                },
+            ],
+        };
+        if (option && typeof option === "object") {
+            myChart.setOption(option);
+        }
+    
+        function changeData() {
+            var isChecked = document.getElementById("flexSwitchCheckDefault").checked;
+            console.log(isChecked);
+            if (isChecked) {
+                if (option && typeof option === "object") {
+                    option.series = series1;
+                    myChart.setOption(option);
+                }
+            } else {
+                if (option && typeof option === "object") {
+                    option.series = series1;
+                    myChart.setOption(option);
+                }
+            }
+        }
+        window.addEventListener("resize", myChart.resize);
+    </script>
+     {% endblock %} 
+</body>

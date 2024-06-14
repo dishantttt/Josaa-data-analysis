@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Document</title>
+  </head>
+  <body>
+    <form method="post" enctype="multipart/form-data">
+      {% csrf_token %}
+      <input type="file" name="document" id="" />
+      <button type="submit">add</button>
+    </form>
+
+
+    <ul>
+      <li><a href="/base" target="_blank">Base</a></li>
+      <li><a href="data" target="_blank">Data</a></li>
+      <li><a href="/dig-q1" target="_blank">Dig Q1</a></li>
+      <li><a href="/dig-q2" target="_blank">Dig Q2</a></li>
+      <li><a href="/mohit-q1" target="_blank">mohit Q1</a></li>
+      <li><a href="/mohit-q2" target="_blank">Mohit Q2</a></li>
+      <li><a href="/dev-q3" target="_blank">dev Q3</a></li>
+      <li><a href="/trendspecial" target="_blank">akshat q1</a></li>
+      <li><a href="/trenddual" target="_blank">Akshat q2</a></li>
+      <li><a href="/sid-q1" target="_blank">sid q1</a></li>
+      <li><a href="/sid-q2" target="_blank">sid q2</a></li>
+      <li><a href="/sid-q3" target="_blank">sid q3</a></li>
+    </ul>
+  </body>
+</html>

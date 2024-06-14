@@ -1,0 +1,152 @@
+{% extends "main/base.html" %}
+{% block title %}Dual Degree{% endblock %}
+{% block additional_content %}
+<script src="https://cdn.jsdelivr.net/npm/echarts@5.2.2/dist/echarts.min.js"></script>
+    <style>
+        table,
+        th,
+        tr,
+        td {
+            padding: 5px;
+            border: solid;
+            text-align: center;
+        }
+        #chart-container {
+            position: relative;
+            height: 90vh;
+            overflow: hidden;
+            }
+        @keyframes rotate {
+            from {
+                transform: rotate(0deg);
+            }
+            to { 
+                transform: rotate(360deg);
+            }
+        }
+
+        @-webkit-keyframes rotate {
+            from {
+                -webkit-transform: rotate(0deg);
+            }
+            to { 
+                -webkit-transform: rotate(360deg);
+            }
+        }
+
+        .load {
+            position: absolute;
+            width: 100px;
+            height: 100px;
+            margin-left: calc(50vw - 50px);
+            margin-top: calc(50vh - 50px);
+            border:solid 10px blue;
+            border-radius: 50%;
+            border-right-color: transparent;
+            border-bottom-color: transparent;
+            -webkit-transition: all 0.5s ease-in;
+            -webkit-animation-name:             rotate; 
+            -webkit-animation-duration:         1.0s; 
+            -webkit-animation-iteration-count:  infinite;
+            -webkit-animation-timing-function: linear;
+                
+                transition: all 0.5s ease-in;
+            animation-name:             rotate; 
+            animation-duration:         1.0s; 
+            animation-iteration-count:  infinite;
+            animation-timing-function: linear; 
+        }
+        #fade{
+            filter: blur(5px);
+        }
+    </style>
+    
+    {% endblock %}
+    {%block question%}{{question}}{%endblock%}
+{% block content%}
+      <div id="chart-container"></div>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/flowbite/1.6.6/flowbite.min.js"></script>
+    <script src="https://fastly.jsdelivr.net/npm/echarts@5.4.2/dist/echarts.min.js"></script>
+    <script>
+        {% comment %} function showTable() {
+          var isChecked = document.getElementById(
+            "flexSwitchCheckDefault"
+          ).checked;
+          console.log(isChecked);
+          var table = document.getElementById("data_table");
+          if (isChecked) {
+            table.style.display = "block";
+          } else {
+            table.style.display = "none";
+          }
+        } {% endcomment %}
+        {% comment %} Chart Building {% endcomment %}
+        var dom = document.getElementById("chart-container");
+        var myChart = echarts.init(dom, null, {
+          renderer: "canvas",
+          useDirtyRect: false,
+        });
+        var app = {};
+
+        var option;
+        var dataString = '{{ data|safe }}';
+        var data = JSON.parse(dataString);
+        var dataString = '{{ year|safe }}';
+        var years = JSON.parse(dataString);
+        console.log(data,years);
+
+        var yearwise_data = [];
+        {% comment %} for (var i = 0; i < years.length; i++) {
+          var temp = [];
+          for (var j = 0; j < data.length; j++) {
+            if (data[j].year == years[i]) {
+              temp.push(data[j].closing_rank);
+            }
+          }
+          yearwise_data.push(temp);
+        } {% endcomment %}
+        option = {
+          textStyle:{ color: '#fff',
+      fontWeight:'600'},
+          
+          tooltip: {
+            trigger: "axis",
+          },
+          legend: {
+            zlevel: 1,
+            orient: "vertical",
+            type:'scroll',
+            height:'60',
+            right:'center',
+            textStyle:{ color: '#fff',
+      fontWeight:'600'},
+          },
+          series: data,
+          grid: {
+            top:'15%',
+            left: "5%",
+            bottom: "8%",
+            containLabel: true,
+          },
+          toolbox: {},
+          xAxis: {
+            type: "category",
+            boundaryGap: true,
+            data: years,
+          },
+          yAxis: {
+            type: "value",
+            boundaryGap: true,
+            scale: true,
+          },
+        };
+
+        if (option && typeof option === "object") {
+          myChart.setOption(option);
+        }
+
+        window.addEventListener("resize", myChart.resize);
+    </script>
+{% endblock %}
+{% block desc%}
+{%endblock%}

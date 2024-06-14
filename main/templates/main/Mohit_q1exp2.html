@@ -1,0 +1,78 @@
+{% extends "main/base.html" %}
+
+
+<head>
+    {% block title %}Popularity among OLD IITS{% endblock %}
+    {% block additional_content %}
+    <script src="https://cdn.jsdelivr.net/npm/echarts@5.2.2/dist/echarts.min.js"></script>
+    {% endblock %}
+</head>
+<body style="background-color: rgb(31, 41, 55); color: white;">
+  {% block content %}
+  <h2>Popularity Variation among Old IITs?
+  </h2>
+  <div id="graph-container" style="width: 80vw; height: 70vh; "></div>
+
+  <script>
+    // Create an ECharts instance
+    var myChart = echarts.init(document.getElementById('graph-container'));
+
+    var instituteData = JSON.parse('{{ institute_data|escapejs }}');
+
+    
+    var years = instituteData[0].data.map(function(item) {
+      return item.year;
+    });
+
+    var seriesData = instituteData.map(function(institute) {
+  var popularityData = institute.data.map(function(item) {
+    // Calculate popularity based on the inverse of closing rank and scale it to a range of 0 to 5
+    var popularity = 1 / item.avg_closing_rank;
+    var scaledPopularity = popularity * (5 / Math.max(...instituteData.map(i => Math.max(...i.data.map(d => 1 / d.avg_closing_rank)))));
+    return scaledPopularity;
+  });
+
+  return {
+    name: institute.name,
+    type: 'line',
+    data: popularityData
+  };
+});
+
+    var option = {
+      textStyle:{ color: 'gray',
+      fontWeight:'600'},
+      legend: {
+        zLevel: 1,
+                orient: "vertical",
+                type: "scroll",
+                top: 25,
+                textStyle:{
+                    color:'white',
+                }     
+      },
+      grid: {
+                top:"20%",
+                left: "5%",
+                right: "7%",
+                containLabel: true,
+            },
+
+      xAxis: {
+        type: 'category',
+        data: years,
+        name: 'Years'
+      },
+      yAxis: {
+        type: 'value',
+        name: 'Popularity',
+      },
+      series: seriesData
+    };
+
+    myChart.setOption(option);
+  </script>
+    {% endblock %}
+
+</body>
+</html>

@@ -1,0 +1,935 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/flowbite/1.6.6/flowbite.min.css" rel="stylesheet" />
+  <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/1.10.25/css/jquery.dataTables.min.css">
+
+  <title>{% block title %}Base{% endblock %}</title>
+  {% block additional_content %} {% endblock %}
+  <style>
+    body {
+      margin: 0;
+      padding: 0;
+    }
+
+    .main-container {
+      color: white;
+    }
+
+    .go-back-btn {
+      display: flex;
+      font-size: 1.3vw;
+      align-items: center;
+    }
+
+    .container {
+      max-width: 960px;
+      margin: 0 auto;
+      padding: 20px;
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: space-between;
+    }
+
+    .box {
+      width: calc(33.33% - 20px);
+      background-color: rgb(55, 65, 81);
+      padding: 20px;
+      margin-bottom: 20px;
+      box-sizing: border-box;
+    }
+
+    /* multiselect css starts*/
+    @import url("https://fonts.googleapis.com/css?family=Quicksand:400,500,700&subset=latin-ext");
+
+    /* body {
+            
+            min-height: 100vh;
+            color: #ADAFB6;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background: #fff;
+            transition: all .2s ease;
+        } */
+
+    .multiSelect {
+      font-family: "Quicksand", sans-serif;
+      font-weight: 450;
+      width: 100%;
+      position: relative;
+    }
+
+    .year_dropdown {
+      font-family: "Quicksand", sans-serif;
+      font-weight: 450;
+      width: 100%;
+      color: #b8bcbf;
+      height: 3vw;
+      border-radius: 4px;
+    }
+
+    .year_dropdown option {
+      font-family: "Quicksand", sans-serif;
+      font-weight: 450;
+      height: 100px;
+      width: 100%;
+      color: #444f5b;
+      padding: 30px;
+    }
+
+    .multiSelect *,
+    .multiSelect *::before,
+    .multiSelect *::after {
+      box-sizing: border-box;
+    }
+
+    .multiSelect_dropdown {
+      font-size: 14px;
+      min-height: 35px;
+      line-height: 35px;
+      border-radius: 4px;
+      box-shadow: none;
+      outline: none;
+      background-color: #fff;
+      color: #444f5b;
+      border: 1px solid #d9dbde;
+      font-weight: 400;
+      padding: 0.5px 13px;
+      margin: 0;
+      transition: 0.1s border-color ease-in-out;
+      cursor: pointer;
+    }
+
+    .multiSelect_dropdown.-hasValue {
+      padding: 5px 30px 5px 5px;
+      cursor: default;
+    }
+
+    .multiSelect_dropdown.-open {
+      box-shadow: none;
+      outline: none;
+      padding: 4.5px 29.5px 4.5px 4.5px;
+      border: 1.5px solid #4073ff;
+    }
+
+    .multiSelect_arrow::before,
+    .multiSelect_arrow::after {
+      content: "";
+      position: absolute;
+      display: block;
+      width: 2px;
+      height: 8px;
+      border-radius: 20px;
+      border-bottom: 8px solid #99a3ba;
+      top: 40%;
+      transition: all 0.15s ease;
+    }
+
+    .multiSelect_arrow::before {
+      right: 18px;
+      -webkit-transform: rotate(-50deg);
+      transform: rotate(-50deg);
+    }
+
+    .multiSelect_arrow::after {
+      right: 13px;
+      -webkit-transform: rotate(50deg);
+      transform: rotate(50deg);
+    }
+
+    .multiSelect_list {
+      margin: 0;
+      margin-bottom: 25px;
+      padding: 0;
+      list-style: none;
+      opacity: 0;
+      visibility: hidden;
+      position: absolute;
+      max-height: calc(10 * 31px);
+      top: 28px;
+      left: 0;
+      z-index: 9999;
+      right: 0;
+      background: #fff;
+      border-radius: 4px;
+      overflow-x: hidden;
+      overflow-y: auto;
+      -webkit-transform-origin: 0 0;
+      transform-origin: 0 0;
+      transition: opacity 0.1s ease, visibility 0.1s ease,
+        -webkit-transform 0.15s cubic-bezier(0.4, 0.6, 0.5, 1.32);
+      transition: opacity 0.1s ease, visibility 0.1s ease,
+        transform 0.15s cubic-bezier(0.4, 0.6, 0.5, 1.32);
+      transition: opacity 0.1s ease, visibility 0.1s ease,
+        transform 0.15s cubic-bezier(0.4, 0.6, 0.5, 1.32),
+        -webkit-transform 0.15s cubic-bezier(0.4, 0.6, 0.5, 1.32);
+      -webkit-transform: scale(0.8) translate(0, 4px);
+      transform: scale(0.8) translate(0, 4px);
+      border: 1px solid #d9dbde;
+      box-shadow: 0px 10px 20px 0px rgba(0, 0, 0, 0.12);
+    }
+
+    .multiSelect_option {
+      margin: 0;
+      padding: 0;
+      opacity: 0;
+      -webkit-transform: translate(6px, 0);
+      transform: translate(6px, 0);
+      transition: all 0.15s ease;
+    }
+
+    .multiSelect_option.-selected {
+      display: none;
+    }
+
+    .multiSelect_option:hover .multiSelect_text {
+      color: #fff;
+      background: #4d84fe;
+    }
+
+    .multiSelect_text {
+      cursor: pointer;
+      display: block;
+      padding: 5px 13px;
+      color: #525c67;
+      font-size: 14px;
+      text-decoration: none;
+      outline: none;
+      position: relative;
+      transition: all 0.15s ease;
+    }
+
+    .multiSelect_list.-open {
+      opacity: 1;
+      visibility: visible;
+      -webkit-transform: scale(1) translate(0, 12px);
+      transform: scale(1) translate(0, 12px);
+      transition: opacity 0.15s ease, visibility 0.15s ease,
+        -webkit-transform 0.15s cubic-bezier(0.4, 0.6, 0.5, 1.32);
+      transition: opacity 0.15s ease, visibility 0.15s ease,
+        transform 0.15s cubic-bezier(0.4, 0.6, 0.5, 1.32);
+      transition: opacity 0.15s ease, visibility 0.15s ease,
+        transform 0.15s cubic-bezier(0.4, 0.6, 0.5, 1.32),
+        -webkit-transform 0.15s cubic-bezier(0.4, 0.6, 0.5, 1.32);
+    }
+
+    .multiSelect_list.-open+.multiSelect_arrow::before {
+      -webkit-transform: rotate(-130deg);
+      transform: rotate(-130deg);
+    }
+
+    .multiSelect_list.-open+.multiSelect_arrow::after {
+      -webkit-transform: rotate(130deg);
+      transform: rotate(130deg);
+    }
+
+    .multiSelect_list.-open .multiSelect_option {
+      opacity: 1;
+      -webkit-transform: translate(0, 0);
+      transform: translate(0, 0);
+    }
+
+    .multiSelect_list.-open .multiSelect_option:nth-child(1) {
+      transition-delay: 10ms;
+    }
+
+    .multiSelect_list.-open .multiSelect_option:nth-child(2) {
+      transition-delay: 20ms;
+    }
+
+    .multiSelect_list.-open .multiSelect_option:nth-child(3) {
+      transition-delay: 30ms;
+    }
+
+    .multiSelect_list.-open .multiSelect_option:nth-child(4) {
+      transition-delay: 40ms;
+    }
+
+    .multiSelect_list.-open .multiSelect_option:nth-child(5) {
+      transition-delay: 50ms;
+    }
+
+    .multiSelect_list.-open .multiSelect_option:nth-child(6) {
+      transition-delay: 60ms;
+    }
+
+    .multiSelect_list.-open .multiSelect_option:nth-child(7) {
+      transition-delay: 70ms;
+    }
+
+    .multiSelect_list.-open .multiSelect_option:nth-child(8) {
+      transition-delay: 80ms;
+    }
+
+    .multiSelect_list.-open .multiSelect_option:nth-child(9) {
+      transition-delay: 90ms;
+    }
+
+    .multiSelect_list.-open .multiSelect_option:nth-child(10) {
+      transition-delay: 100ms;
+    }
+
+    .multiSelect_choice {
+      background: rgba(77, 132, 254, 0.1);
+      color: #444f5b;
+      padding: 4px 8px;
+      line-height: 17px;
+      margin: 5px;
+      display: inline-block;
+      font-size: 8px;
+      border-radius: 30px;
+      cursor: pointer;
+      font-weight: 500;
+    }
+
+    .multiSelect_deselect {
+      width: 12px;
+      height: 12px;
+      display: inline-block;
+      stroke: #b2bac3;
+      stroke-width: 4px;
+      margin-top: -1px;
+      margin-left: 2px;
+      vertical-align: middle;
+    }
+
+    .multiSelect_choice:hover .multiSelect_deselect {
+      stroke: #a1a8b1;
+    }
+
+    .multiSelect_noselections {
+      text-align: center;
+      padding: 7px;
+      color: #b2bac3;
+      font-weight: 450;
+      margin: 0;
+    }
+
+    .multiSelect_placeholder {
+      position: absolute;
+      left: 20px;
+      font-size: 14px;
+      top: 8px;
+      padding: 0 4px;
+      background-color: #fff;
+      color: #b8bcbf;
+      pointer-events: none;
+      transition: all 0.1s ease;
+    }
+
+    .multiSelect_dropdown.-open+.multiSelect_placeholder,
+    .multiSelect_dropdown.-open.-hasValue+.multiSelect_placeholder {
+      top: -11px;
+      left: 17px;
+      color: #4073ff;
+      font-size: 13px;
+    }
+
+    .multiSelect_dropdown.-hasValue+.multiSelect_placeholder {
+      top: -11px;
+      left: 17px;
+      color: #6e7277;
+      font-size: 13px;
+    }
+
+    /* multiselect css ends*/
+
+    /* Adjust the box width for smaller screens */
+    @media (max-width: 767px) {
+      .box {
+        width: calc(50% - 20px);
+      }
+    }
+
+      /* Adjust the box width for mobile screens */
+      @media (max-width: 479px) {
+        .box {
+          width: 100%;
+        }
+      }
+      div.dataTables_wrapper div.dataTables_filter{
+            color: gray;
+            float: left;
+
+        }
+        div.dataTables_wrapper{
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding-top: 2%;
+            padding-bottom: 2%;
+            width: 70vw;
+            padding-left: 10%;
+            overflow-x: scroll;
+            -ms-overflow-style: none;  /* IE and Edge */
+            scrollbar-width: none;  /* Firefox */
+        }
+        div.dataTables_wrapper::-webkit-scrollbar {
+  display: none;
+}
+        div.dataTables_wrapper div.dataTables_paginate span .ellipsis{
+            color: #777 !important;
+        }
+        div.dataTables_wrapper div.dataTables_paginate span .paginate_button,.dataTables_wrapper .dataTables_paginate .paginate_button{
+            
+            color: gray !important;
+        }
+        
+        .dataTables_wrapper .dataTables_paginate .paginate_button.disabled, .dataTables_wrapper .dataTables_paginate{
+            color: gray !important;
+        }
+         .dataTables_wrapper .dataTables_paginate .paginate_button.disabled:hover{
+            color: black !important;
+        }
+
+    .dataTables_wrapper .dataTables_paginate .paginate_button:hover {
+      border: 1px solid gray !important;
+      background: gray !important;
+      color: black !important;
+    }
+
+    .dataTables_wrapper .dataTables_length {
+      display: none;
+    }
+
+    div.dataTables_wrapper div.dataTables_filter {
+      padding-bottom: 2%;
+    }
+
+    div.dataTables_wrapper div.dataTables_filter input {
+      background-color: #222;
+      color: white;
+      border: 1px solid #FFF;
+      padding-bottom: 2%;
+      /* Add any other CSS styles as needed */
+    }
+
+        /* Customize pagination buttons */
+         .dark-table {
+                    background-color: #333;
+                    color: white;
+                    width: 70%;
+                    position: relative;
+                    text-align: center;
+                    justify-content: center;
+                    overflow-x: scroll;
+                }
+
+    .dark-table th,
+    .dark-table td {
+      padding: 10px;
+      border: 1px solid #555;
+    }
+
+    .dark-table th {
+      background-color: #222;
+    }
+
+    .dark-table td {
+      background-color: #222;
+    }
+
+    .dark-table tr:hover {
+      background-color: #444;
+    }
+
+    @keyframes rotate {
+      from {
+        transform: rotate(0deg);
+      }
+
+      to {
+        transform: rotate(360deg);
+      }
+    }
+
+    @-webkit-keyframes rotate {
+      from {
+        -webkit-transform: rotate(0deg);
+      }
+
+      to {
+        -webkit-transform: rotate(360deg);
+      }
+    }
+
+    .load {
+      z-index: 5;
+      position: absolute;
+      width: 100px;
+      height: 100px;
+      margin-left: calc(50vw - 50px);
+      margin-top: calc(50vh - 50px);
+      border: solid 10px rgb(26 86 219);
+      border-radius: 50%;
+      border-right-color: transparent;
+      border-bottom-color: transparent;
+      -webkit-transition: all 0.5s ease-in;
+      -webkit-animation-name: rotate;
+      -webkit-animation-duration: 1.0s;
+      -webkit-animation-iteration-count: infinite;
+      -webkit-animation-timing-function: linear;
+
+      transition: all 0.5s ease-in;
+      animation-name: rotate;
+      animation-duration: 1.0s;
+      animation-iteration-count: infinite;
+      animation-timing-function: linear;
+    }
+
+    #fade {
+      filter: blur(10px);
+    }
+  </style>
+</head>
+
+<body class="bg-white dark:bg-gray-900">
+  <div class="load"></div>
+  <div id="fade">
+    {% include 'main/navbar.html' %}
+    <div class="main-container bg-white dark:bg-gray-900">
+
+      <button data-drawer-target="default-sidebar" data-drawer-toggle="default-sidebar" aria-controls="default-sidebar"
+        type="button"
+        class="inline-flex items-center p-2 pt-20 mt-2 ml-3 text-sm text-gray-500 rounded-lg sm:hidden hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-gray-200 dark:text-gray-400 dark:hover:bg-gray-700 dark:focus:ring-gray-600">
+        <span class="sr-only">Filters</span>
+        <div
+          class="w-auto h-auto focus:outline-none text-white bg-red-700 hover:bg-red-800 focus:ring-4 focus:ring-red-300 font-medium rounded-lg text-sm px-4 py-2 mr-2 mb-2 dark:bg-red-600 dark:hover:bg-red-700 dark:focus:ring-red-900"
+          aria-hidden="true">
+          Filters
+        </div>
+      </button>
+
+      <aside id="default-sidebar"
+        class="fixed top-0 left-0 pt-16 z-40 w-64 h-screen transition-transform -translate-x-full sm:translate-x-0"
+        aria-label="Sidebar">
+        <div class="h-full px-3 py-4 overflow-y-auto bg-gray-50 dark:bg-gray-800">
+          <!-- <ul class="space-y-2 font-medium">
+                  <li>
+                     <a href="#" class="flex items-center p-2 text-gray-900 rounded-lg dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700 group">
+                        <svg class="w-5 h-5 text-gray-500 transition duration-75 dark:text-gray-400 group-hover:text-gray-900 dark:group-hover:text-white" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 22 21">
+                           <path d="M16.975 11H10V4.025a1 1 0 0 0-1.066-.998 8.5 8.5 0 1 0 9.039 9.039.999.999 0 0 0-1-1.066h.002Z"/>
+                           <path d="M12.5 0c-.157 0-.311.01-.565.027A1 1 0 0 0 11 1.02V10h8.975a1 1 0 0 0 1-.935c.013-.188.028-.374.028-.565A8.51 8.51 0 0 0 12.5 0Z"/>
+                        </svg>
+                        <span class="ml-3">Dashboard</span>
+                     </a>
+                  </li>
+                  <li>
+                     <a href="#" class="flex items-center p-2 text-gray-900 rounded-lg dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700 group">
+                        <svg class="flex-shrink-0 w-5 h-5 text-gray-500 transition duration-75 dark:text-gray-400 group-hover:text-gray-900 dark:group-hover:text-white" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 18 18">
+                           <path d="M6.143 0H1.857A1.857 1.857 0 0 0 0 1.857v4.286C0 7.169.831 8 1.857 8h4.286A1.857 1.857 0 0 0 8 6.143V1.857A1.857 1.857 0 0 0 6.143 0Zm10 0h-4.286A1.857 1.857 0 0 0 10 1.857v4.286C10 7.169 10.831 8 11.857 8h4.286A1.857 1.857 0 0 0 18 6.143V1.857A1.857 1.857 0 0 0 16.143 0Zm-10 10H1.857A1.857 1.857 0 0 0 0 11.857v4.286C0 17.169.831 18 1.857 18h4.286A1.857 1.857 0 0 0 8 16.143v-4.286A1.857 1.857 0 0 0 6.143 10Zm10 0h-4.286A1.857 1.857 0 0 0 10 11.857v4.286c0 1.026.831 1.857 1.857 1.857h4.286A1.857 1.857 0 0 0 18 16.143v-4.286A1.857 1.857 0 0 0 16.143 10Z"/>
+                        </svg>
+                        <span class="flex-1 ml-3 whitespace-nowrap">Kanban</span>
+                        <span class="inline-flex items-center justify-center px-2 ml-3 text-sm font-medium text-gray-800 bg-gray-100 rounded-full dark:bg-gray-700 dark:text-gray-300">Pro</span>
+                     </a>
+                  </li>
+                  <li>
+                     <a href="#" class="flex items-center p-2 text-gray-900 rounded-lg dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700 group">
+                        <svg class="flex-shrink-0 w-5 h-5 text-gray-500 transition duration-75 dark:text-gray-400 group-hover:text-gray-900 dark:group-hover:text-white" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 20 20">
+                           <path d="m17.418 3.623-.018-.008a6.713 6.713 0 0 0-2.4-.569V2h1a1 1 0 1 0 0-2h-2a1 1 0 0 0-1 1v2H9.89A6.977 6.977 0 0 1 12 8v5h-2V8A5 5 0 1 0 0 8v6a1 1 0 0 0 1 1h8v4a1 1 0 0 0 1 1h2a1 1 0 0 0 1-1v-4h6a1 1 0 0 0 1-1V8a5 5 0 0 0-2.582-4.377ZM6 12H4a1 1 0 0 1 0-2h2a1 1 0 0 1 0 2Z"/>
+                        </svg>
+                        <span class="flex-1 ml-3 whitespace-nowrap">Inbox</span>
+                        <span class="inline-flex items-center justify-center w-3 h-3 p-3 ml-3 text-sm font-medium text-blue-800 bg-blue-100 rounded-full dark:bg-blue-900 dark:text-blue-300">3</span>
+                     </a>
+                  </li>
+                  <li>
+                     <a href="#" class="flex items-center p-2 text-gray-900 rounded-lg dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700 group">
+                        <svg class="flex-shrink-0 w-5 h-5 text-gray-500 transition duration-75 dark:text-gray-400 group-hover:text-gray-900 dark:group-hover:text-white" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 20 18">
+                           <path d="M14 2a3.963 3.963 0 0 0-1.4.267 6.439 6.439 0 0 1-1.331 6.638A4 4 0 1 0 14 2Zm1 9h-1.264A6.957 6.957 0 0 1 15 15v2a2.97 2.97 0 0 1-.184 1H19a1 1 0 0 0 1-1v-1a5.006 5.006 0 0 0-5-5ZM6.5 9a4.5 4.5 0 1 0 0-9 4.5 4.5 0 0 0 0 9ZM8 10H5a5.006 5.006 0 0 0-5 5v2a1 1 0 0 0 1 1h11a1 1 0 0 0 1-1v-2a5.006 5.006 0 0 0-5-5Z"/>
+                        </svg>
+                        <span class="flex-1 ml-3 whitespace-nowrap">Users</span>
+                     </a>
+                  </li>
+                  <li>
+                     <a href="#" class="flex items-center p-2 text-gray-900 rounded-lg dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700 group">
+                        <svg class="flex-shrink-0 w-5 h-5 text-gray-500 transition duration-75 dark:text-gray-400 group-hover:text-gray-900 dark:group-hover:text-white" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 18 20">
+                           <path d="M17 5.923A1 1 0 0 0 16 5h-3V4a4 4 0 1 0-8 0v1H2a1 1 0 0 0-1 .923L.086 17.846A2 2 0 0 0 2.08 20h13.84a2 2 0 0 0 1.994-2.153L17 5.923ZM7 9a1 1 0 0 1-2 0V7h2v2Zm0-5a2 2 0 1 1 4 0v1H7V4Zm6 5a1 1 0 1 1-2 0V7h2v2Z"/>
+                        </svg>
+                        <span class="flex-1 ml-3 whitespace-nowrap">Products</span>
+                     </a>
+                  </li>
+                  <li>
+                     <a href="#" class="flex items-center p-2 text-gray-900 rounded-lg dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700 group">
+                        <svg class="flex-shrink-0 w-5 h-5 text-gray-500 transition duration-75 dark:text-gray-400 group-hover:text-gray-900 dark:group-hover:text-white" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 18 16">
+                           <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M1 8h11m0 0L8 4m4 4-4 4m4-11h3a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2h-3"/>
+                        </svg>
+                        <span class="flex-1 ml-3 whitespace-nowrap">Sign In</span>
+                     </a>
+                  </li>
+                  <li>
+                     <a href="#" class="flex items-center p-2 text-gray-900 rounded-lg dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700 group">
+                        <svg class="flex-shrink-0 w-5 h-5 text-gray-500 transition duration-75 dark:text-gray-400 group-hover:text-gray-900 dark:group-hover:text-white" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 20 20">
+                           <path d="M5 5V.13a2.96 2.96 0 0 0-1.293.749L.879 3.707A2.96 2.96 0 0 0 .13 5H5Z"/>
+                           <path d="M6.737 11.061a2.961 2.961 0 0 1 .81-1.515l6.117-6.116A4.839 4.839 0 0 1 16 2.141V2a1.97 1.97 0 0 0-1.933-2H7v5a2 2 0 0 1-2 2H0v11a1.969 1.969 0 0 0 1.933 2h12.134A1.97 1.97 0 0 0 16 18v-3.093l-1.546 1.546c-.413.413-.94.695-1.513.81l-3.4.679a2.947 2.947 0 0 1-1.85-.227 2.96 2.96 0 0 1-1.635-3.257l.681-3.397Z"/>
+                           <path d="M8.961 16a.93.93 0 0 0 .189-.019l3.4-.679a.961.961 0 0 0 .49-.263l6.118-6.117a2.884 2.884 0 0 0-4.079-4.078l-6.117 6.117a.96.96 0 0 0-.263.491l-.679 3.4A.961.961 0 0 0 8.961 16Zm7.477-9.8a.958.958 0 0 1 .68-.281.961.961 0 0 1 .682 1.644l-.315.315-1.36-1.36.313-.318Zm-5.911 5.911 4.236-4.236 1.359 1.359-4.236 4.237-1.7.339.341-1.699Z"/>
+                        </svg>
+                        <span class="flex-1 ml-3 whitespace-nowrap">Sign Up</span>
+                     </a>
+                  </li>
+               </ul> -->
+            
+               <a href="/" class="hidden lg:block">
+                <div class="go-back-btn">
+                      <svg
+                    height="2.5vw"
+                    id="Layer_1"
+                    style="enable-background: new 0 0 512 512; color: white"
+                    version="1.1"
+                    viewBox="0 0 512 512"
+                    xml:space="preserve"
+                    xmlns="http://www.w3.org/2000/svg"
+                    xmlns:xlink="http://www.w3.org/1999/xlink"
+                  >
+                    <polygon
+                      fill="white"
+                      points="352,128.4 319.7,96 160,256 160,256 160,256 319.7,416 352,383.6 224.7,256 "
+                    />
+                  </svg>
+                  Go Back
+                </div>
+            </a>
+               <form method="post">
+                {% csrf_token %}
+                <div class="relative">
+                  <!-- Dropdown menu -->
+                  <div
+                    id="dropdown"
+                    class="inset-0 mx-auto mt-2 p-4 bg-dark shadow-lg rounded-lg z-10"
+                  >
+                    <div class="mb-4">
+                      <h6
+                        class="text-lg font-bold mb-2 text-gray-900 dark:text-white"
+                      >
+                        Filters
+                      </h6>
+                      <div class="flex space-x-4">
+                        <button
+                          type="submit"
+                          name="apply_filter"
+                          class="inline-flex items-center px-3 py-2 text-sm font-medium text-center text-white bg-blue-700 rounded-lg hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800"
+                        >
+                          Apply Filter
+                        </button>
+                        <button
+                          id="clearButton"
+                          name="clear_filter"
+                          class="inline-flex items-center px-3 py-2 text-sm font-medium text-center text-white bg-red-700 rounded-lg hover:bg-red-800 focus:ring-4 focus:outline-none focus:ring-red-300 dark:bg-red-600 dark:hover:bg-red-700 dark:focus:ring-red-800"
+                        >
+                          Clear Selections
+                        </button>
+                      </div>
+                    </div>
+                    <button
+                    type="button"
+                    id="tableButton"
+                    onclick=showTable()
+                    class="inline-flex items-center px-3 py-2 text-sm font-medium text-center text-white bg-blue-700 rounded-lg hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800"
+                  >
+                    Show table
+                  </button>
+                    <div id="accordion-flush">
+                      {% if isCollegeNeeded == "True" %}
+                      <h2
+                        id="category-heading"
+                        class="flex items-center justify-between text-gray-900 dark:text-white focus:outline-none py-2"
+                      >
+                        <span>College</span>
+                      </h2>
+      
+                      <!-- College -->
+                      <div class="multiSelect">
+                        <select
+                          class="multiSelect_field"
+                          data-placeholder="Select College"
+                          name="college"
+                          multiple
+                        >
+                          {% for clg in colleges %}
+                          <option value="{{clg.0}}">{{clg.1}}</option>
+                          {% endfor %}
+                        </select>
+                      </div>
+                      {% endif %}
+                      <!-- Branch -->
+                      {% if isBranchNeeded == "True" %}
+                      <h2
+                        id="price-heading"
+                        class="flex items-center justify-between text-gray-900 dark:text-white focus:outline-none py-2"
+                      >
+                        <span>Branch</span>
+                      </h2>
+      
+                      <div class="multiSelect">
+                        <select
+                          class="multiSelect_field"
+                          data-placeholder="Select Branch"
+                          name="branch"
+                          multiple
+                        >
+                          {% for branch in branches %}
+                          <option value="{{branch.0}}">{{branch.1}}</option>
+                          {% endfor %}
+                        </select>
+                      </div>
+                      {% endif %}
+                      <!-- Seat  Type-->
+                      {% if isSeatTypeNeeded == "True" %}
+      
+                      <h2
+                        id="worldwide-shipping-heading"
+                        class="flex items-center justify-between text-gray-900 dark:text-white focus:outline-none py-2"
+                      >
+                        <span>Seat Type</span>
+                      </h2>
+                      <div class="multiSelect">
+                        <select
+                          class="multiSelect_field"
+                          data-placeholder="Select Seat Type"
+                          name="seat_type"
+                          multiple
+                        >
+                          {% for seat_type in seat_types %}
+                          <option value="{{seat_type.0}}">{{seat_type.1}}</option>
+                          {% endfor %}
+                        </select>
+                      </div>
+                      {% endif %}
+                      <!-- Year -->
+                      {% if isYearNeeded == "True" %}
+                      <h2
+                        id="year-heading"
+                        class="flex items-center justify-between text-gray-900 dark:text-white focus:outline-none py-2"
+                      >
+                        <span> Year</span>
+                      </h2>
+      
+                      <div>
+                        <select
+                          data-placeholder="Select Year"
+                          class="year_dropdown"
+                          name="year"
+                        >
+                          <option value="0" selected disabled>Select Year</option>
+                          {% for yr in years %}
+                          <option value="{{yr.0}}">{{yr.1}}</option>
+                          {% endfor %}
+                        </select>
+                      </div>
+                      {% endif %}
+      
+                      <!-- gender -->
+                      {% if isGenderNeeded == "True" %}
+                      <h2
+                        id="gender-heading"
+                        class="flex items-center justify-between text-gray-900 dark:text-white focus:outline-none py-2"
+                      >
+                        <span class="">Gender</span>
+                      </h2>
+                      <div class="multiSelect">
+                        <select
+                          class="multiSelect_field"
+                          data-placeholder="Select Gender"
+                          name="gender"
+                          multiple
+                        >
+                          {% for gender in genders %}
+                          <option value="{{gender.0}}">{{gender.1}}</option>
+                          {% endfor %}
+                        </select>
+                      </div>
+                      {% endif %}
+                    </div>
+                  </div>
+                </div>
+              </form>
+            </div>
+         </aside>
+         
+         <div class="p-4 sm:ml-64 pt-10">
+            <div class="p-4  rounded-lg dark:border-gray-700">
+                <div class="chart-container"><div><div>{% block question%}{%endblock%}</div>{% block content %} {% endblock %}{% block desc%}{%endblock%}</div>
+                <div>
+                  <table id="data_table" class="dark-table">
+                      <thead>
+                        <tr>
+                          <th>SI No</th>
+                          <th>Institute Name</th>
+                          <th>Institute Type</th>
+                          <th>Program</th>
+                          <th>Seat Type</th>
+                          <th>Gender</th>
+                          <th>Opening Rank</th>
+                          <th>Closing Rank</th>
+                          <th>Year</th>
+                          <th>Round No</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {% for data in alldata %}
+                        <tr>
+                          <td>{{forloop.counter}}</td>
+                          <td>{{data.institute}}</td>
+                          <td>{{data.institute_type}}</td>
+                          <td>{{data.program}}</td>
+                          <td>{{data.seat_type}}</td>
+                          <td>{{data.gender}}</td>
+                          <td>{{data.opening_rank}}</td>
+                          <td>{{data.closing_rank}}</td>
+                          <td>{{data.year}}</td>
+                          <td>{{data.roundNo}}</td>
+                        </tr>
+                        {% endfor %}
+                      </tbody>
+                    </table>
+                  </div>
+              </div>
+            </div>
+         </div>
+    <svg xmlns="http://www.w3.org/2000/svg" style="display: none">
+      <symbol xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" id="iconX">
+        <g stroke-linecap="round" stroke-linejoin="round">
+          <line x1="18" y1="6" x2="6" y2="18"></line>
+          <line x1="6" y1="6" x2="18" y2="18"></line>
+        </g>
+      </symbol>
+    </svg>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/flowbite/1.6.6/flowbite.min.js"></script>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    
+    <!-- Include DataTables JavaScript -->
+    <script src="https://cdn.datatables.net/1.10.25/js/jquery.dataTables.min.js"></script>
+    <script>
+          var flag=true;
+          var table;
+          var tb;
+          function showTable(){
+            if(flag){
+              table.style.display='flex';
+              tb.innerHTML='Hide Table';
+            }else{
+              table.style.display='none';
+              tb.innerHTML='Show Table';
+            }
+            flag=!flag;
+          }
+        window.addEventListener('load', function () {
+          setTimeout(()=>{
+            tb=document.getElementById('tableButton')
+            table=document.getElementById('data_table_wrapper')
+            table.style.display='none';
+            var loadingScreen = document.getElementsByClassName('load')[0];
+            loadingScreen.style.display = 'none';
+            document.getElementById('fade').style.filter = 'none';
+          },500)});
+      jQuery(function ($) {
+        // Your DataTables initialization code here
+        $('#data_table').DataTable({
+          paging: true,
+          lengthMenu: false,
+          pageLength: 10,
+          searching: true,
+          ordering: true,
+          language: {
+            info: "",
+            infoEmpty: "",
+            infoFiltered: ""
+          },
+          responsive: true
+        });
+  
+        // Clear button click event
+        $("#clearButton").click(function () {
+          // Clear form elements
+          $("form")[0].reset();
+  
+          // Reset selected options in multiselect dropdowns
+          $(".multiSelect_choice").remove();
+          $(".multiSelect_option").removeClass("-selected");
+          $(".multiSelect_dropdown").removeClass("-hasValue");
+          $(".multiSelect_noselections").remove();
+        });
+  
+        // MultiSelect
+        $(".multiSelect").each(function (index) {
+          var self = $(this);
+          var field = self.find(".multiSelect_field");
+          var fieldOption = field.find("option");
+          var placeholder = field.attr("data-placeholder");
+  
+          field.hide().after(
+            `<div class="multiSelect_dropdown"></div>
+            <span class="multiSelect_placeholder">${placeholder}</span>
+            <ul class="multiSelect_list"></ul>
+            <span class="multiSelect_arrow"></span>`
+            );
+
+            fieldOption.each(function () {
+              self.find(".multiSelect_list").append(
+                `<li class="multiSelect_option" data-value="${$(this).val()}">
+                <a class="multiSelect_text">${$(this).text()}</a>
+              </li>`
+              );
+            });
+
+            var dropdown = self.find(".multiSelect_dropdown");
+            var list = self.find(".multiSelect_list");
+            var option = self.find(".multiSelect_option");
+            var optionText = self.find(".multiSelect_text");
+
+            dropdown.attr("data-multiple", "true");
+            list.css("top", dropdown.height() + 5);
+
+            option.click(function (e) {
+              var self = $(this);
+              e.stopPropagation();
+              self.addClass("-selected");
+              field.find("option:contains(" + self.children().text() + ")").prop("selected", true);
+              dropdown.append(function () {
+                return $('<span class="multiSelect_choice">' + self.children().text() +
+                  '<svg class="multiSelect_deselect -iconX"><use href="#iconX"></use></svg></span>')
+                  .click(function (e) {
+                    var self = $(this);
+                    e.stopPropagation();
+                    self.remove();
+                    list.find(".multiSelect_option:contains(" + self.text() + ")").removeClass("-selected");
+                    list.css("top", dropdown.height() + 5)
+                      .find(".multiSelect_noselections").remove();
+                    field.find("option:contains(" + self.text() + ")").prop("selected", false);
+                    if (dropdown.children(":visible").length === 0) {
+                      dropdown.removeClass("-hasValue");
+                    }
+                  });
+              }).addClass("-hasValue");
+              list.css("top", dropdown.height() + 5);
+              if (!option.not(".-selected").length) {
+                list.append('<h5 class="multiSelect_noselections">No Selections</h5>');
+              }
+            });
+
+            dropdown.click(function (e) {
+              e.stopPropagation();
+              e.preventDefault();
+              dropdown.toggleClass("-open");
+              list.toggleClass("-open").scrollTop(0).css("top", dropdown.height() + 5);
+            });
+
+            $(document).on("click touch", function (e) {
+              if (dropdown.hasClass("-open")) {
+                dropdown.toggleClass("-open");
+                list.removeClass("-open");
+              }
+            });
+          });
+        });
+      </script>
+    </div>
+  </div>
+</body>
+
+</html>

@@ -1,0 +1,179 @@
+{% extends "main/base.html" %}
+{% load static %}
+<html lang="en">
+    <head>
+        {% block additional_content %}
+        
+        <!-- {% block title %}All data{% endblock %} -->
+
+        <style>
+            table,
+            th,
+            tr,
+            td {
+                padding: 5px;
+                border: solid;
+            }
+            #chart {
+                width: 600px;
+            }
+            #chart-container {
+            position: relative;
+            height: 60vh;
+            width: 55%;
+            overflow: hidden;
+            }
+        </style>
+    {% endblock %}
+
+    </head>
+    <body>
+        {% block content %}
+        <h2 class="text-gray-900 dark:text-white">
+        Filter to get trend in opening and closing rank of any college
+        </h2>
+        <div class="form-check form-switch">
+            <input class="form-check-input" type="checkbox" role="switch" onchange=showTable() id="flexSwitchCheckDefault">
+            <label class="form-check-label text-gray-900 dark:text-white" for="flexSwitchCheckDefault">Show Table</label>
+          </div>
+
+        <div id="chart-container"></div>
+
+        {% if jsdata %}
+        <table id="data_table" style="display: none;">
+            <tr>
+                <th>SI No</th>
+                <th>Institute Name</th>
+                <th>Institute Type</th>
+                <th>Program</th>
+                <th>Seat Type</th>
+                <th>Gender</th>
+                <th>Opening Rank</th>
+                <th>Closing Rank</th>
+                <th>Year</th>
+                <th>Round No</th>
+            </tr>
+            {% for data in alldata %}
+            <tr>
+                <td>{{forloop.counter}}</td>
+                <td>{{data.institute}}</td>
+                <td>{{data.institute_type}}</td>
+                <td>{{data.program}}</td>
+                <td>{{data.seat_type}}</td>
+                <td>{{data.gender}}</td>
+                <td>{{data.opening_rank}}</td>
+                <td>{{data.closing_rank}}</td>
+                <td>{{data.year}}</td>
+                <td>{{data.roundNo}}</td>
+            </tr>
+            {% endfor %}
+        </table>
+{% endif %}
+        <script src="https://fastly.jsdelivr.net/npm/echarts@5.4.2/dist/echarts.min.js"></script>
+
+        <script>
+            var dom = document.getElementById("chart-container");
+            var myChart = echarts.init(dom, null, {
+                renderer: "canvas",
+                useDirtyRect: false,
+            });
+            var app = {};
+            function showTable(){
+                var isChecked = document.getElementById('flexSwitchCheckDefault').checked;
+                console.log(isChecked);
+                var table = document.getElementById('data_table');
+                if(isChecked) {
+                    table.style.display = 'block';
+                }
+                else{
+                    table.style.display = 'none';
+                }
+            }
+            var option;
+            var dataString = '{{ jsdata|safe }}';
+            console.log(dataString);
+            var data = JSON.parse(dataString);
+
+            var years = [];
+            var yearwise_data = [];
+
+            for (var i = 0; i < data.length; i++) {
+                years.push(data[i].year);
+            }
+            
+            function removeDuplicates(years) {
+                return [...new Set(years)];
+            }
+            years = removeDuplicates(years);
+            console.log(years);
+            for(var i = 0; i < years.length;i++ ){
+                var temp = [];
+                for (var j = 0; j < data.length; j++) {
+                    if(data[j].year == years[i]){
+                        temp.push(data[j].closing_rank)
+                    }
+                }
+                yearwise_data.push(temp);
+            }
+            // console.log(yearwise_data);
+
+            var series = [];
+            var i = 0;
+            colors = ['#ae1029','#0065c2','#26c238', '#9876aa', '#fb8649', 
+             '#57904b','#d35b5c'];
+            for (const tempdata of yearwise_data ?? []) {
+                series.push({
+                    name:years[i++],
+                    type: "line",
+                    data: tempdata,
+                    smooth: true, 
+                    // color:colors[i],
+                    symbolSize: 3,
+                });
+            }
+
+            console.log(series);
+
+            option = {
+                title: {
+                    text: "YearWise Closing Rank for All Rounds",
+                },
+                tooltip: {
+                    trigger: "axis",
+                },
+                legend: {
+                    // zlevel: 1,
+                    orient:'vertical',
+                    right:0,
+                }, 
+                series: series,
+                grid: {
+                    left: "5%",
+                    right: "7%",
+                    bottom: "8%",
+                    containLabel: true,
+                },
+                toolbox: {
+                },
+                xAxis: {
+                    type: "category",
+                    boundaryGap: true,
+                    data: ["Round 1","Round 2","Round 3","Round 4","Round 5","Round 6","Round 7"],
+                },
+                yAxis: {
+                    type: "value",
+                    boundaryGap:true,
+                    scale:true,
+                },
+            }
+
+            if (option && typeof option === "object") {
+                myChart.setOption(option);
+            }
+
+            window.addEventListener("resize", myChart.resize);
+        </script>
+    {% endblock %}
+
+    </body>
+</html>

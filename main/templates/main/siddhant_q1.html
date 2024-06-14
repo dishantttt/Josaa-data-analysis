@@ -1,0 +1,286 @@
+{% extends "main/base.html" %}
+
+<head>
+  {% block title %}siddhant q3{% endblock %} {% block additional_content %}
+  <script src="https://cdn.jsdelivr.net/npm/echarts@5.2.2/dist/echarts.min.js"></script>
+  <style>
+    body {
+      background-color: rgb(31, 41, 55);
+    }
+
+    #chart-container {
+      position: relative;
+      height: 90vh;
+      width: 100%;
+      overflow: hidden;
+    }
+  </style>
+  {% endblock %}
+</head>
+
+<body>
+  {% block content %}
+
+  <h2>
+    How does the popularity of non-engineering courses (such as B.Arch, B.Sc,
+    etc.) compare to traditional engineering branches?
+  </h2>
+  <div class="form-check form-switch">
+    <input
+      class="form-check-input"
+      type="checkbox"
+      role="switch"
+      onchange="changeData()"
+      id="flexSwitchCheckDefault"
+    />
+    <label class="form-check-label" for="flexSwitchCheckDefault"
+      >Closing Rank
+    </label>
+  </div>
+  <div id="chart-container"></div>
+
+  <script src="https://fastly.jsdelivr.net/npm/echarts@5.4.2/dist/echarts.min.js"></script>
+
+  <script>
+        var dataString = '{{ jsdata|safe }}';
+        var data = JSON.parse(dataString);
+        // console.log(data);
+
+        years = [];
+        colleges = [];
+        opening_ranks = [];
+        closing_ranks =[];
+        non_opening_ranks = [];
+        non_closing_ranks =[];
+        branches =[];
+        non_btech_course=[];
+
+        function removeDuplicates(arr) {
+            return [...new Set(arr)];
+        }
+
+        for(var i = 0;i<data.length;i++){
+            years.push(data[i].year);
+            colleges.push(data[i].institute);
+            branches.push(data[i].program);
+            non_btech_course.push(data[i].program);
+        }
+        branches = removeDuplicates(branches);
+        non_btech_course=removeDuplicates(non_btech_course);
+        branches = branches.filter(branch => branch.toLowerCase().includes("technology"));
+        non_btech_course = non_btech_course.filter(item => !branches.includes(item));
+        colleges = removeDuplicates(colleges);
+        years = removeDuplicates(years);
+        var non_data = [];
+        for (var i = 0; i < data.length; i++) {
+        if (non_btech_course.includes(data[i].program)) {
+            non_data.push(data[i]);
+        }
+        }
+        var non_colleges=[];
+        for(var i=0;i<non_data.length;i++){
+            non_colleges.push(non_data[i].institute);
+        }
+        non_colleges=removeDuplicates(non_colleges);
+     console.log(non_colleges);
+        // console.log(colleges);
+         branches=[
+         'Engineering Physics (4 Years Bachelor of Technology)',
+        'Computer Science and Engineering (4 Years Bachelor of Technology)',
+         'Civil Engineering (4 Years Bachelor of Technology)',
+         'Chemical Engineering (4 Years Bachelor of Technology)',
+     'Mechanical Engineering (4 Years Bachelor of Technology)',
+        'Electrical Engineering (4 Years Bachelor of Technology)',
+     ]
+        for(var k = 0 ;k<5 ;k++) {
+            temp1 = [];
+            temp2 = [];
+            var collegenum=[];
+            for(var i = 0; i < years.length; i++){
+                var sum1 = 0;
+                var sum2 = 0;
+                for(var j = 0;j<data.length;j++){
+                    if(data[j].program == branches[k]){
+                        if(data[j].year == years[i]){
+                            collegenum.push(data[j].institute);
+                            sum1 += parseInt( data[j].opening_rank, 10); //don't forget to add the base
+                            sum2 += parseInt( data[j].closing_rank, 10); //don't forget to add the base
+                        }
+                    }
+                }
+                var avg1 = sum1/collegenum.length;
+                avg1 = Math.round(avg1);
+                var avg2 = sum2/collegenum.length;
+                avg2 = Math.round(avg2);
+                temp1.push(avg1);
+                temp2.push(avg2);
+            }
+            opening_ranks.push(temp1);
+            closing_ranks.push(temp2);
+        }
+        for(var k = 0 ;k<10 ;k++) {
+            temp1 = [];
+            temp2 = [];
+            var collegenum=[];
+            for(var i = 0; i < years.length; i++){
+                var sum1 = 0;
+                var sum2 = 0;
+                for(var j = 0;j<non_data.length;j++){
+                    if(non_data[j].program == non_btech_course[k]){
+                        if(non_data[j].year == years[i]){
+                            collegenum.push(data[j].institute);
+                            sum1 += parseInt( non_data[j].opening_rank, 10); //don't forget to add the base
+                            sum2 += parseInt( non_data[j].closing_rank, 10); //don't forget to add the base
+                        }
+                    }
+                }
+                var avg1 = sum1/collegenum.length;
+                avg1 = Math.round(avg1);
+                var avg2 = sum2/collegenum.length;
+                avg2 = Math.round(avg2);
+                temp1.push(avg1);
+                temp2.push(avg2);
+            }
+            non_opening_ranks.push(temp1);
+            non_closing_ranks.push(temp2);
+        }
+
+
+
+        var dom = document.getElementById("chart-container");
+        var myChart = echarts.init(dom, null, {
+            renderer: "canvas",
+            useDirtyRect: false,
+        });
+
+
+        var series1 = [];
+    var nonseries1 = [];
+    color1 = ['#ae1029', '#0065c2', '#26c238', '#9876aa', '#fb8649', '#57904b', '#d35b5c'];
+    color2 = ['#94C9CC', '#E3ACAC', '#9592F5', '#9BCB98', '#F9D19D', '#57904b', '#d35b5c'];
+    for (var i = 0; i < opening_ranks.length; i++) {
+        nonseries1.push({
+            name: non_btech_course[i],
+            type: "bar",
+            data: non_opening_ranks[i],
+            color: color1[i]
+        });
+        series1.push({
+            name: branches[i],
+            type: "bar",
+            data: opening_ranks[i],
+            color: color2[i]
+        });
+    }
+
+    for(var i=0;i<nonseries1.length;i++){
+    nonseries1[i].name+='(Non-Engineering)';
+ }
+
+    var series2 = [];
+    var nonseries2 = [];
+    color1 = ['#ae1029', '#0065c2', '#26c238', '#9876aa', '#fb8649', '#57904b', '#d35b5c'];
+    color2 = ['#94C9CC', '#E3ACAC', '#9592F5', '#9BCB98', '#F9D19D', '#57904b', '#d35b5c'];
+    for (var i = 0; i < closing_ranks.length; i++) {
+        nonseries2.push({
+            name: non_btech_course[i],
+            type: "bar",
+            data: non_closing_ranks[i],
+            color: color1[i]
+        });
+        series2.push({
+            name: branches[i],
+            type: "bar",
+            data: closing_ranks[i],
+            color: color2[i]
+        });
+    }
+    for(var i=0;i<nonseries2.length;i++){
+    nonseries2[i].name+='(Non-Engineering)';
+ }
+
+
+    var mergedSeries = series1.concat(nonseries1);
+    var mergedSeries2=series2.concat(nonseries2);
+
+    var isClosing = 0;
+    var text = isClosing ? 'Trend of Closing ranks over different years.' : 'Trend of Opening ranks over different years.';
+
+    option = {
+        title: {
+            text: text,
+            bottom: 0,
+            left: 350,
+            textStyle: {
+                fontSize: 20,
+                color:'white',
+            },
+        },
+        tooltip: {
+            trigger: "axis",
+        },
+        legend: {
+            zLevel: 1,
+            orient: 'vertical',
+            type:'scroll',
+            height:'70',
+            right:'0%',
+            top: '0%',
+            textStyle: {
+            color: 'white'
+        }
+
+        },
+        series: mergedSeries,
+        grid: {
+            left: "5%",
+            right: "7%",
+            bottom: "8%",
+            containLabel: true,
+        },
+        toolbox: {},
+        xAxis: {
+            type: "category",
+            boundaryGap: true,
+            data: years,
+            name: 'Years',
+            textStyle:{
+                color:'white',
+            }
+
+        },
+        yAxis: [{
+            type: "value",
+            boundaryGap: true,
+            scale: true,
+            name: isClosing ? 'Closing Ranks' : 'Opening Ranks',
+        }],
+    };
+
+    if (option && typeof option === "object") {
+        myChart.setOption(option);
+    }
+
+            function changeData(){
+                var isChecked = document.getElementById('flexSwitchCheckDefault').checked;
+                console.log(isChecked);
+                // var table = document.getElementById('data_table');
+                if(isChecked) {
+                    if (option && typeof option === "object") {
+                        option.series = mergedSeries2;
+                        myChart.setOption(option);
+                    }
+                    // table.style.display = 'block';
+                }
+                else{
+                    if (option && typeof option === "object") {
+                        option.series = series1;
+                        myChart.setOption(option);
+                    }
+                    // table.style.display = 'none';
+                }
+            }
+            window.addEventListener("resize", myChart.resize);
+  </script>
+  {% endblock %}
+</body>
