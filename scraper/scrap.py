@@ -1,5 +1,6 @@
 # Don't Add All data at once Enter Manual Year and Round Values to not get Server Timeouts 
 from bs4 import BeautifulSoup
+from selenium import webdriver
 import mechanize 
 import pandas as pd
 def get_jitems(browser,element):
